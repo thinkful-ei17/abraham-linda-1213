@@ -13,25 +13,24 @@ function renderResult(result) {
   return `
     <div>
       <p> ${result.printTitle} </p>
-      <img class="js-result-thumbnail" src="${result.displayThumbnailUrl}" alt="image" height="${result.displayThumbnailHeight}" width="${result.displayThumbnailWidth}">
+      <img data-embedlink=${result.embedLink} class="js-result-thumbnail" src="${result.displayThumbnailUrl}" alt="image" height="${result.displayThumbnailHeight}" width="${result.displayThumbnailWidth}">
     </div>
   `;
 }
 
 //default first result to display, switch once other thumbnails selected
-function generateEmbededVideo(){
+function generateEmbededVideo(embedLink){
   //let embedVideo = $('iframe').attr('src', imgSrc);
   console.log('generateEmbededVideo ran');
-  $('.embeded-video-player').html(`<iframe src="http://www.youtube.com/embed/${store.videos[store.currentSelectedVideo].embedLink}"
+  $('.embeded-video-player').html(`<iframe src="http://www.youtube.com/embed/${embedLink}"
   width="560" height="315" frameborder="0" allowfullscreen></iframe>`);
-
-  
 }
 
 function handleThumbClicked(){
   $('.js-search-results').on('click', '.js-result-thumbnail', function(event){
     const imgSrc = $(event.currentTarget).attr('src'); //current source of image
-    
+    const embedLink = $(event.currentTarget).attr('data-embedlink');
+    generateEmbededVideo(embedLink);
     //find in object
     //search for imagesource is same as imge source selected; replace index with clicked index
     
@@ -57,7 +56,7 @@ function getVideosFromApi(searchTerm, callback){
     'safeSearch':'strict',
     'part': 'snippet',
     'q': `${searchTerm}`,
-    'type': 'string'
+    'type': 'video'
   };
   $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
 }
@@ -81,7 +80,7 @@ function displayYoutubeSearchData(data) {
   const results = store.videos.map(item => renderResult(item));
 
   $('.js-search-results').html(results);
-  generateEmbededVideo();
+  generateEmbededVideo(store.videos[0].embedLink);
 }
 
 function watchSubmit() {
