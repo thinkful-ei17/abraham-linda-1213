@@ -1,3 +1,5 @@
+'use strict';
+
 const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
 
 /*
@@ -127,19 +129,25 @@ function buildApiRequest(requestMethod, path, params, properties) {
 
 
 function renderResult(result) {
+  let printTitle = result.snippet.title;
+  let displayThumbnailUrl = result.snippet.thumbnails.default.url;
+  let displayThumbnailWidth = result.snippet.thumbnails.default.width;
+  let displayThumbnailHeight = result.snippet.thumbnails.default.height;
+  let embedLink = displayThumbnailHeight = result.id.videoID;
   return `
     <div>
-      <h2>
-      <a class="js-result-name" href="${result.html_url}" target="_blank">${result.name}</a> by <a class="js-user-name" href="${result.owner.html_url}" target="_blank">${result.owner.login}</a></h2>
-      <p>Number of watchers: <span class="js-watchers-count">${result.watchers_count}</span></p>
-      <p>Number of open issues: <span class="js-issues-count">${result.open_issues}</span></p>
+      <p> ${printTitle} </p>
+      <iframe src="http://www.youtube.com/embed/${embedLink}"
+      width="560" height="315" frameborder="0" allowfullscreen></iframe>
+      <img class="js-result-thumbnail" src="${displayThumbnailUrl}" alt="image" height="${displayThumbnailHeight}" width="${displayThumbnailWidth}">
     </div>
   `;
 }
 
+
 function getVideosFromApi(searchTerm, callback){
   const query = {
-    'key': '',
+    'key': 'AIzaSyA3MLZQz9_qUiSL6qM-zKL6igf6KxR6ckA',
     'maxResults': '4',
     'safeSearch':'strict',
     'part': 'snippet',
@@ -153,6 +161,7 @@ function getVideosFromApi(searchTerm, callback){
 function displayYoutubeSearchData(data) {
   const results = data.items.map((item, index) => renderResult(item));
   $('.js-search-results').html(results);
+  console.log(data);
 }
 
 function watchSubmit() {
