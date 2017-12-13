@@ -5,6 +5,8 @@ const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
 
 const store = { //default store is empty array
   videos: [],
+  searchTerm: null,
+  nextPageToken: null,
 };
 
 
@@ -42,13 +44,35 @@ function getVideosFromApi(searchTerm, callback){
     'q': searchTerm,
     'type': 'video'
   };
+  store.searchTerm = searchTerm;
+  $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
+
+}
+
+function getNextVideosFromApi(callback){
+  const query = {
+    'key': 'AIzaSyA7d_pPgxIQP-QxDzHnkK3SBq_nOQOV3Wk',
+    'maxResults': '4',
+    'safeSearch':'strict',
+    'part': 'snippet',
+    'q': store.searchTerm,
+    'type': 'video',
+    'pageToken': store.nextPageToken
+  };
+
   $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
 }
 
+
   
 function displayYoutubeSearchData(data) {
+  console.log(`Here is what I have in Data`);
   console.log(data);
-  if (store.videos.length >= 4) store.videos = []; //returns back to empty array
+  store.prevPageToken = store.nextPageToken;
+  store.nextPageToken = data.nextPageToken;
+  //store.prevPageToken = ('prevPageToken' in data ? data.prevPageToken : null);
+
+  store.videos = []; //returns back to empty array
   data.items.forEach((item, index) => { //push array object for each result returned
     store.videos.push(
       { printTitle : item.snippet.title,
@@ -57,7 +81,7 @@ function displayYoutubeSearchData(data) {
         displayThumbnailHeight : item.snippet.thumbnails.default.height,
         embedLink :  item.id.videoId,
         channelTitle: item.snippet.channelTitle,
-        channelId: item.snippet.channelId,
+        channelId: item.snippet.channelId
       }
     );
   }
@@ -67,6 +91,17 @@ function displayYoutubeSearchData(data) {
 
   $('.js-search-results').html(results);
   generateEmbededVideo(store.videos[0].embedLink); //default embeded video with first search result, before any thumbnails clicked
+  // Check to see if there are additional pages and only render if true
+  // if nextPageToken is null -- check docs
+  $('.js-search-results').append('<button type="button" class="next-button">Next</button>');
+}
+
+function handleNextButtonClicked(){
+  $('.js-search-results').on('click', '.next-button', function(event){
+    console.log('Hello from handleNextButtonClicked');
+    event.preventDefault();
+    getNextVideosFromApi(displayYoutubeSearchData);
+  });
 }
 
 function watchSubmit() { //starts
@@ -80,6 +115,7 @@ function watchSubmit() { //starts
   });
 
   handleThumbClicked();
+  handleNextButtonClicked();
 
 }
 
