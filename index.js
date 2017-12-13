@@ -12,7 +12,8 @@ function renderResult(result) {
   return `
     <div>
       <p> ${result.printTitle} </p>
-      <img data-embedlink=${result.embedLink} class="js-result-thumbnail" src="${result.displayThumbnailUrl}" alt="image" height="${result.displayThumbnailHeight}" width="${result.displayThumbnailWidth}">
+      <a href=""></a><img data-embedlink=${result.embedLink} class="js-result-thumbnail" src="${result.displayThumbnailUrl}" alt="image" height="${result.displayThumbnailHeight}" width="${result.displayThumbnailWidth}">
+      <a href="https://www.youtube.com/channel/${result.channelId}" target="_blank">See more at ${result.channelTitle}</a>
     </div>
   `;
 }
@@ -46,15 +47,17 @@ function getVideosFromApi(searchTerm, callback){
 
   
 function displayYoutubeSearchData(data) {
+  console.log(data);
   if (store.videos.length >= 4) store.videos = []; //returns back to empty array
-
   data.items.forEach((item, index) => { //push array object for each result returned
     store.videos.push(
       { printTitle : item.snippet.title,
         displayThumbnailUrl : item.snippet.thumbnails.default.url,
         displayThumbnailWidth : item.snippet.thumbnails.default.width,
         displayThumbnailHeight : item.snippet.thumbnails.default.height,
-        embedLink :  item.id.videoId
+        embedLink :  item.id.videoId,
+        channelTitle: item.snippet.channelTitle,
+        channelId: item.snippet.channelId,
       }
     );
   }
