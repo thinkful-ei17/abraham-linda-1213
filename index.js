@@ -118,9 +118,10 @@ function parseYoutubeSearchData(data) {  //getting it ready to display, ex. pars
 
   console.log('store in parseYoutubeSearchData is', store.videos);
 
-  const results = store.videos.map(item => renderResult(item));
+  const results = store.videos.map(item => renderEachVideoResult(item)); //send each video to renderEachVideoResult
 
   $('.js-search-results').html(results);
+
   renderEmbededVideo(store.videos[0].embedLink); //default embeded video with first search result, before any thumbnails clicked
 
   // Check to see if there are additional pages and only render if true
@@ -134,8 +135,8 @@ function parseYoutubeSearchData(data) {  //getting it ready to display, ex. pars
   //NEW EXTENSION - END
 }
 
-function renderResult(result) {
-  console.log('4 - renderResult - I render the parsed API returned response/data to HTML');
+function renderEachVideoResult(result) {
+  console.log('4 - renderEachVideoResult - I render the parsed API returned response/data to HTML');
   return `
     <div>
       <p> ${result.printTitle} </p>
@@ -147,7 +148,7 @@ function renderResult(result) {
 
 
 function renderEmbededVideo(embedLink){ //change name of function to render or display
-  console.log('5 - renderEmbededVideo - I render the enlarged video to HTML');
+  console.log('5 (initial) or option 6b - renderEmbededVideo - I render the enlarged video to HTML');
   $('.embeded-video-player').html(`<iframe src="http://www.youtube.com/embed/${embedLink}"
   width="560" height="315" frameborder="0" allowfullscreen></iframe>`);
 }
@@ -155,7 +156,7 @@ function renderEmbededVideo(embedLink){ //change name of function to render or d
 //event handler at top or bottom
 function handleThumbClicked(){ 
   $('.js-search-results').on('click', '.js-result-thumbnail', function(event){
-    console.log('Extension - option 6 - handleThumbClicked - listen for click event on thumbnail, main/enlarged video swaps out to display clicked thumbnail');
+    console.log('Extension - option 6a - handleThumbClicked - listen for click event on thumbnail, main/enlarged video swaps out to display clicked thumbnail');
     const embedLink = $(event.currentTarget).attr('data-embedlink');
     renderEmbededVideo(embedLink);
   });
