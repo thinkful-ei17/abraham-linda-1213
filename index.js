@@ -11,6 +11,7 @@ const store = { //default store is empty array
 
 
 function renderResult(result) {
+  console.log('3 - renderResult - I take the API returned data and render to HTML');
   return `
     <div>
       <p> ${result.printTitle} </p>
@@ -22,7 +23,7 @@ function renderResult(result) {
 
 //default first result to display, switch once other thumbnails selected
 function generateEmbededVideo(embedLink){
-  console.log('generateEmbededVideo ran');
+  console.log('4 - generateEmbededVideo - I generate a placeholder HTML for the enlarged video');
   $('.embeded-video-player').html(`<iframe src="http://www.youtube.com/embed/${embedLink}"
   width="560" height="315" frameborder="0" allowfullscreen></iframe>`);
 }
@@ -32,12 +33,13 @@ function handleThumbClicked(){
     const embedLink = $(event.currentTarget).attr('data-embedlink');
     generateEmbededVideo(embedLink);
   });
+  console.log('Feature - handleThumbClicked - listen for click event on thumbnail, main/enlarged video swaps out to display clicked thumbnail');
 }
 
 
 function getVideosFromApi(searchTerm, callback){
   const query = {
-    'key': 'AIzaSyA7d_pPgxIQP-QxDzHnkK3SBq_nOQOV3Wk',
+    'key': 'AIzaSyBrIixEdZ-49tfK_8J4aaCqLs_XF4573bw', //need to get new key, then run localhost server
     'maxResults': '4',
     'safeSearch':'strict',
     'part': 'snippet',
@@ -46,12 +48,12 @@ function getVideosFromApi(searchTerm, callback){
   };
   store.searchTerm = searchTerm;
   $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
-
+  console.log('2 - getVideosFromApi - I fetch the data from API');
 }
 
 function getNextVideosFromApi(callback){
   const query = {
-    'key': 'AIzaSyA7d_pPgxIQP-QxDzHnkK3SBq_nOQOV3Wk',
+    'key': 'AIzaSyAOb9qrCtfeiKEDIGu2UU0QSsWf6AhshDk', //need to get new key, then run localhost server
     'maxResults': '4',
     'safeSearch':'strict',
     'part': 'snippet',
@@ -61,16 +63,15 @@ function getNextVideosFromApi(callback){
   };
 
   $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
+  console.log('Extension - 7 - getNextVideosFromApi - I fetch the data from API for next videos');
 }
 
 
   
 function displayYoutubeSearchData(data) {
-  console.log(`Here is what I have in Data`);
-  console.log(data);
   store.prevPageToken = store.nextPageToken;
   store.nextPageToken = data.nextPageToken;
-  //store.prevPageToken = ('prevPageToken' in data ? data.prevPageToken : null);
+ // store.prevPageToken = ('prevPageToken' in data ? data.prevPageToken : null);
 
   store.videos = []; //returns back to empty array
   data.items.forEach((item, index) => { //push array object for each result returned
@@ -94,11 +95,12 @@ function displayYoutubeSearchData(data) {
   // Check to see if there are additional pages and only render if true
   // if nextPageToken is null -- check docs
   $('.js-search-results').append('<button type="button" class="next-button">Next</button>');
+  console.log('5 - displayYoutubeSearchData - I display the search results, default the first result to display to enlarged video and added Next button');
 }
 
 function handleNextButtonClicked(){
   $('.js-search-results').on('click', '.next-button', function(event){
-    console.log('Hello from handleNextButtonClicked');
+    console.log('Extension - 6 - handleNextButtonClicked - click event listen and initialize getNextVideosFromApi using displayYoutubeSearchData');
     event.preventDefault();
     getNextVideosFromApi(displayYoutubeSearchData);
   });
@@ -116,7 +118,7 @@ function watchSubmit() { //starts
 
   handleThumbClicked();
   handleNextButtonClicked();
-
+  console.log('1 - watchSubmit - kicked it off on page load, listening for submit click event and initialize getVideosFromApi using query and displayYoutubeSearchData');
 }
 
 $(watchSubmit);
