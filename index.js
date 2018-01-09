@@ -1,8 +1,24 @@
 'use strict';
 /* global $*/
 
-//Note: get new google youtube API key to obtain response and run on localhost
-//Note: This application is an example of using jQuery AJAX library vs. Fetch API library - distint diff, have other types as well.
+/* Application Note(s)
++ get new google youtube API key to obtain response and run on localhost
++ this application is an example of using jQuery AJAX library vs. Fetch API library - distint diff, have other types as well.
+*/
+
+/*Note(s)
++API - Application Programming Interface => specification for 2 systems to communicate (web API, handles HTTP/XML protocol requests)
+1. Event Listener - waiting for user to do action and execute search on API
+2. Fetch/Get Data/Response from API
+3. Decorate/Parse Data/ADD to STORE - data becomes JS object
+4. Render result
+
++ general rule of thumb (grot) - organize code by grouping of business logic (ie core functionality, (ex api, parsing response and render); event handlers; data ; helper functions (ex. capitalize)
+
++ grot - organize event handlers at top OR bottom
+
++ general tip (gt) - write down script - common questions - question and response; job desc and requirements (answer each req with example or future improv/progress)
+*/
 
 const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
 
@@ -10,12 +26,12 @@ const store = { //start at default store with empty array
   videos: [],
   searchTerm: null,
   nextPageToken: null,
+  prevPageToken: null
 };
 
-//general rule of thumb (grot) - organize code by grouping of business logic (ie core functionality, (ex api, parsing response and render); event handlers; data ; helper functions (ex. capitalize)
+/*-------------------------EVENT LISTENER  - START-------------------*/
 
-//general tip (gt) - write down script - common questions - question and response; job desc and requirements (answer each req with example or future improv/progress)
-
+//#1
 function handleWatchSubmit() { //starts
   console.log('1 - handleWatchSubmit - kicked off application on page load, listening for submit click event and initialize getVideosFromApi using query and call back function parseYoutubeSearchData');
 
@@ -36,6 +52,9 @@ function handleWatchSubmit() { //starts
 
 }
 
+/*-------------------------API-------------------*/
+
+//#2
 function getVideosFromApi(searchTerm, callback){
   console.log('2 - getVideosFromApi - get the JSON data from API');
   const query = {//query built to specification of Youtube API
@@ -57,6 +76,7 @@ function getVideosFromApi(searchTerm, callback){
   
 }
 
+// Extension - Option 7b (get)
 function getNextVideosFromApi(callback){
   console.log('Extension - Option 7b (get) - getNextVideosFromApi - I get the data from API for next videos');
   const query = {
@@ -72,6 +92,7 @@ function getNextVideosFromApi(callback){
   $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
 }
 
+// Extension - Option 8b (get)
 //NEW EXTENSION - START
 function getPrevVideosFromApi(callback){
   console.log('Extension - Option 8b (get) - getPrevVideosFromApi - I get the data from API for previous videos');
@@ -87,16 +108,19 @@ function getPrevVideosFromApi(callback){
 
   $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
 }
-
 //NEW EXTENSION - END
 
 
+/*-------------------------DECORATE DATA-------------------*/
+
+//#3
 function parseYoutubeSearchData(data) {  //getting it ready to display, ex. parseResponse, parseYoutubeData
   console.log('3 - parseYoutubeSearchData - the STORE changes here, I parse the search results, default the first result to parse to enlarged video and added Next button');
   console.log('data in parseYoutubeSearchData is', data);
-  store.prevPageToken = store.nextPageToken;
-  //console.log('first store.prevPageToken', store.prevPageToken);
-  store.nextPageToken = data.nextPageToken;
+  console.log('first data.nextPageToken', data.nextPageToken);
+
+  //store.nextPageToken = data.nextPageToken;
+  //store.prevPageToken = store.nextPageToken;
   //console.log('first store.nextPageToken', store.nextPageToken);
   //store.prevPageToken = ('nextPageToken' in data ? data.nextPageToken : null); //NEW EXTENSION
   //console.log('second store.prevPageToken', store.prevPageToken);
@@ -122,11 +146,24 @@ function parseYoutubeSearchData(data) {  //getting it ready to display, ex. pars
 
   $('.js-search-results').html(results);
 
+  if (data.nextPageToken) { // Check to see if there are additional pages and only display if true 
+    store.nextPageToken = data.nextPageToken;
+    $('.js-search-results').append('<button type="button" class="next-button">Next</button>');
+    console.log('next button added!!!!');
+  }
+
+  if(data.prevPageToken) { //Check to see if there is a prevPageToken and only display if true
+    store.prevPageToken = data.prevPageToken;
+    $('.js-search-results').append('<button type="button" class="prev-button">Previous</button>');
+    console.log('previous button added!!!');
+  }
+
+  //$('.js-search-results').append('<button type="button" class="next-button">Next</button>');
+
   renderEmbededVideo(store.videos[0].embedLink); //default embeded video with first search result, before any thumbnails clicked
 
-  // Check to see if there are additional pages and only render if true
-  // if nextPageToken is null -- check docs
-  $('.js-search-results').append('<button type="button" class="next-button">Next</button>');
+  
+ 
 
   //NEW EXTENSION - START
   // if(store.prevPageToken !== null){
@@ -135,6 +172,9 @@ function parseYoutubeSearchData(data) {  //getting it ready to display, ex. pars
   //NEW EXTENSION - END
 }
 
+/*-------------------------RENDER/DISPLAY DATA-------------------*/
+
+//#4
 function renderEachVideoResult(result) {
   console.log('4 - renderEachVideoResult - I render the parsed API returned response/data to HTML');
   return `
@@ -146,14 +186,16 @@ function renderEachVideoResult(result) {
   `;
 }
 
-
+//#5 or option 6b
 function renderEmbededVideo(embedLink){ //change name of function to render or display
   console.log('5 (initial) or option 6b - renderEmbededVideo - I render the enlarged video to HTML');
   $('.embeded-video-player').html(`<iframe src="http://www.youtube.com/embed/${embedLink}"
   width="560" height="315" frameborder="0" allowfullscreen></iframe>`);
 }
 
-//event handler at top or bottom
+/*-------------------------EVENT HANDLERS-------------------*/
+
+//Extension - Option 6a
 function handleThumbClicked(){ 
   $('.js-search-results').on('click', '.js-result-thumbnail', function(event){
     console.log('Extension - option 6a - handleThumbClicked - listen for click event on thumbnail, main/enlarged video swaps out to display clicked thumbnail');
@@ -163,6 +205,7 @@ function handleThumbClicked(){
  
 }
 
+//Extension 7a
 function handleNextButtonClicked(){
   $('.js-search-results').on('click', '.next-button', function(event){
     console.log('Extension - option 7a (handle) - handleNextButtonClicked - click event listen and initialize getNextVideosFromApi using displayYoutubeSearchData');
@@ -172,15 +215,18 @@ function handleNextButtonClicked(){
   });
 }
 
+//Extension 8a
 //NEW EXTENSION - START
 function handlePrevButtonClicked(){
   $('js-search-results').on('click', '.prev-button', function(event) {
-    console.log('Extension - option 8a (handle) - handlePrevButtonClicked - click even listen and initialize getPrevVideosFromApi using parseYoutubeSearchData');
+    console.log('Extension - option 8a (handle) - handlePrevButtonClicked - click event listen and initialize getPrevVideosFromApi using parseYoutubeSearchData');
     event.preventDefault();
     getPrevVideosFromApi(parseYoutubeSearchData);
   });
 }
 
 //NEW EXTENSION - END
+
+/*-------------------------INITIALIZE-------------------*/
 
 $(handleWatchSubmit);
