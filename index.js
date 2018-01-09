@@ -95,7 +95,7 @@ function displayYoutubeSearchData(data) {
   // Check to see if there are additional pages and only render if true
   // if nextPageToken is null -- check docs
   $('.js-search-results').append('<button type="button" class="next-button">Next</button>');
-  console.log('5 - displayYoutubeSearchData - I display the search results, default the first result to display to enlarged video and added Next button');
+  console.log('5 - displayYoutubeSearchData - the STORE changes here, I display the search results, default the first result to display to enlarged video and added Next button');
 }
 
 function handleNextButtonClicked(){
