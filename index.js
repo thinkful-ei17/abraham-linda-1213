@@ -67,12 +67,34 @@ function getNextVideosFromApi(callback){
 }
 
 
+//NEW EXTENSION - START
+function getPrevVideosFromApi(callback){
+  const query = {
+    'key': 'AIzaSyAOb9qrCtfeiKEDIGu2UU0QSsWf6AhshDk', //need to get new key, then run localhost server
+    'maxResults': '4',
+    'safeSearch':'strict',
+    'part': 'snippet',
+    'q': store.searchTerm,
+    'type': 'video',
+    'pageToken': store.prevPageToken 
+  };
+
+  $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
+  console.log('Extension - 9 - getPrevVideosFromApi - I fetch the data from API for previous videos');
+}
+
+//NEW EXTENSION - END
+
   
 function displayYoutubeSearchData(data) {
   store.prevPageToken = store.nextPageToken;
+  //console.log('first store.prevPageToken', store.prevPageToken);
   store.nextPageToken = data.nextPageToken;
- // store.prevPageToken = ('prevPageToken' in data ? data.prevPageToken : null);
+  //console.log('first store.nextPageToken', store.nextPageToken);
+  //store.prevPageToken = ('nextPageToken' in data ? data.nextPageToken : null); //NEW EXTENSION
+  //console.log('second store.prevPageToken', store.prevPageToken);
 
+  
   store.videos = []; //returns back to empty array
   data.items.forEach((item, index) => { //push array object for each result returned
     store.videos.push(
@@ -88,23 +110,47 @@ function displayYoutubeSearchData(data) {
   }
   );
 
+  console.log('store is', store.videos);
+
   const results = store.videos.map(item => renderResult(item));
+
 
   $('.js-search-results').html(results);
   generateEmbededVideo(store.videos[0].embedLink); //default embeded video with first search result, before any thumbnails clicked
   // Check to see if there are additional pages and only render if true
   // if nextPageToken is null -- check docs
   $('.js-search-results').append('<button type="button" class="next-button">Next</button>');
+
+
+  //NEW EXTENSION - START
+  // if(store.prevPageToken !== null){
+  //   $('.js-search-results').append('<button type="button" class="prev-button">Previous</button>'); 
+  // }
+  //NEW EXTENSION - END
+  
   console.log('5 - displayYoutubeSearchData - the STORE changes here, I display the search results, default the first result to display to enlarged video and added Next button');
 }
+
 
 function handleNextButtonClicked(){
   $('.js-search-results').on('click', '.next-button', function(event){
     console.log('Extension - 6 - handleNextButtonClicked - click event listen and initialize getNextVideosFromApi using displayYoutubeSearchData');
     event.preventDefault();
     getNextVideosFromApi(displayYoutubeSearchData);
+    
   });
 }
+
+//NEW EXTENSION - START
+function handlePrevButtonClicked(){
+  $('js-search-results').on('click', '.prev-button', function(event) {
+    console.log('Extension - 8 - handlePrevButtonClicked - click even listen and initialize getPrevVideosFromApi using displayYoutubeSearchData');
+    event.preventDefault();
+    getPrevVideosFromApi(displayYoutubeSearchData);
+  });
+}
+
+//NEW EXTENSION - END
 
 function watchSubmit() { //starts
   $('.js-search-form').submit(event => {
@@ -118,6 +164,11 @@ function watchSubmit() { //starts
 
   handleThumbClicked();
   handleNextButtonClicked();
+
+  //NEW EXTENSION - START
+  handlePrevButtonClicked();
+  //NEW EXTENSION - END
+
   console.log('1 - watchSubmit - kicked it off on page load, listening for submit click event and initialize getVideosFromApi using query and displayYoutubeSearchData');
 }
 
